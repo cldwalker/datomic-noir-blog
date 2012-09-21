@@ -1,7 +1,8 @@
 (ns noir-blog.views.blog
   (:use noir.core
         hiccup.core
-        hiccup.page-helpers)
+        hiccup.element
+        hiccup.page)
   (:require [noir-blog.models.post :as posts]
             [noir-blog.views.common :as common]
             [noir-blog.models.user :as user]
