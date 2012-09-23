@@ -18,8 +18,11 @@
   (merge (select-keys e (keys e))
          {:db/id (:db/id e)}))
 
-(defn where-all [query & args]
+(defn find-all [query & args]
   (->> (apply where query args) flatten (map entity->map))) 
+
+(defn find-first [query & args]
+  (first (apply find-all query args)))
 
 (defn init []
   (d/delete-database uri)
@@ -50,15 +53,20 @@
      :db/noHistory    history
      :db.install/_attribute :db.part/db}))
     
-
 (defn build-schema [nsp attrs]
   (map #(apply build-schema-attr
                (keyword (name nsp) (name (first %))) (rest %))
        attrs))
 
+(defn build-attr [nsp attr]
+  (->> attr
+    (map (fn [[key val]] [(keyword (name nsp) (name key)) val])) flatten (apply hash-map)
+    (merge {:db/id (tempid)})))
+
+; for repl-testing purposes
 (def user-schema (build-schema :user [[:username :string]  [:password :string]]))
-(def user-data [{:user/username "Coolio" :user/password "Gang"}  {:user/username "Snoop" :user/password "Sucks"}])
+(def user-data [{:username "Coolio" :password "Gang"}  {:username "Snoop" :password "Sucks"}])
 
 (defn user-init []
   @(transact user-schema)
-  @(transact (map #(assoc % :db/id  (tempid)) user-data)))
+  @(transact (map #(build-attr :user %) user-data)))

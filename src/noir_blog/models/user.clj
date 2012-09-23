@@ -1,5 +1,6 @@
 (ns noir-blog.models.user
-  (:require [simpledb.core :as db]
+  (:require [noir-blog.datomic :as db]
+            ;[simpledb.core :as db]
             [noir.util.crypt :as crypt]
             [noir.validation :as vali]
             [noir.session :as session]))
@@ -7,10 +8,10 @@
 ;; Gets
 
 (defn all []
-  (vals (db/get :users)))
+  (db/find-all '[:find ?e :where [?e :user/username]]))
 
 (defn get-username [username]
-  (db/get-in :users [username]))
+  (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username))
     
 (defn admin? []
   (session/get :admin))
@@ -24,7 +25,7 @@
   (assoc user :password (crypt/encrypt password)))
 
 (defn valid-user? [username]
-  (vali/rule (not (db/get-in :users [username]))
+  (vali/rule (not (get-username username))
              [:username "That username is already taken"])
   (vali/rule (vali/min-length? username 3)
              [:username "Username must be at least 3 characters."])
@@ -37,8 +38,8 @@
 
 ;; Operations
 
-(defn- store! [{username :username :as user}]
-  (db/update! :users assoc username user))
+(defn- store! [user]
+  @(db/transact [user]))
 
 (defn login! [{:keys [username password] :as user}]
   (let [{stored-pass :password} (get-username username)]
@@ -52,7 +53,7 @@
 (defn add! [{:keys [username password] :as user}]
   (when (valid-user? username)
     (when (valid-psw? password)
-      (-> user (prepare) (store!)))))
+      (store! (db/build-attr :user (prepare user))))))
 
 (defn edit! [{:keys [username old-name password]}]
   (let [user {:username username :password password}]
@@ -61,9 +62,14 @@
         (-> user (prepare) (store!)))
       (add! user))))
 
+; TODO
 (defn remove! [username]
-  (db/update! :users dissoc username))
+  ;(db/update! :users dissoc username))
+  )
+
+(def user-schema (db/build-schema :user [[:username :string] [:password :string]]))
 
 (defn init! []
-    (db/put! :users {})
-    (store! (prepare {:username "admin" :password "admin"})))
+  @(db/transact user-schema)
+  ; TODO - use add! when valid-* works
+  (store! (db/build-attr :user {:username "admin" :password "admin"})))
