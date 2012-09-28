@@ -30,11 +30,11 @@
   (reset! connection (d/connect uri)))
 
 (defn transact [tx]
-  (prn "Adding..." tx)
+  (prn "Transacting..." tx)
   (d/transact @connection tx))
 
-(defn tempid []
-  (d/tempid :db.part/db))
+(defn delete [& ids]
+   @(transact (map #(vec [:db.fn/retractEntity %]) ids)))
 
 (defn build-schema-attr [attr-name value-type & options]
   (let [cardinality (if (some #{:many} options)
@@ -44,7 +44,7 @@
         history     (boolean (some #{:nohistory} options))
         index       (not (boolean (some #{:noindex} options)))]
     
-    {:db/id           (tempid)
+    {:db/id           (d/tempid :db.part/db)
      :db/ident        attr-name
      :db/valueType    (keyword "db.type" (name value-type))
      :db/cardinality  cardinality
@@ -62,9 +62,12 @@
   (->> oldmap
     (map (fn [[key val]] [(kfn key) val])) flatten (apply hash-map)))
 
+(defn localize-attr [attr]
+  (map-keys attr #(keyword (name %))))
+
 (defn build-attr [nsp attr]
   (->> (map-keys attr #(keyword (name nsp) (name %)))
-    (merge {:db/id (tempid)})))
+    (merge {:db/id (d/tempid :db.part/user)})))
 
 ; for repl-testing purposes
 (def user-schema (build-schema :user [[:username :string]  [:password :string]]))

@@ -8,11 +8,13 @@
 ;; Gets
 
 (defn all []
-  (db/find-all '[:find ?e :where [?e :user/username]]))
+  (->>
+    (db/find-all '[:find ?e :where [?e :user/username]])
+    (map db/localize-attr)))
 
 (defn get-username [username]
   (if-let [user (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username)]
-    (db/map-keys user #(keyword (name %)))))
+    (db/localize-attr user)))
     
 (defn admin? []
   (session/get :admin))
@@ -63,10 +65,9 @@
         (-> user (prepare) (store!)))
       (add! user))))
 
-; TODO
 (defn remove! [username]
-  ;(db/update! :users dissoc username))
-  )
+  (if-let [user (get-username username)]
+    (db/delete (:id user))))
 
 (def user-schema (db/build-schema :user [[:username :string] [:password :string]]))
 
