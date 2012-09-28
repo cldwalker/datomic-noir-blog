@@ -58,9 +58,12 @@
                (keyword (name nsp) (name (first %))) (rest %))
        attrs))
 
+(defn map-keys [oldmap kfn]
+  (->> oldmap
+    (map (fn [[key val]] [(kfn key) val])) flatten (apply hash-map)))
+
 (defn build-attr [nsp attr]
-  (->> attr
-    (map (fn [[key val]] [(keyword (name nsp) (name key)) val])) flatten (apply hash-map)
+  (->> (map-keys attr #(keyword (name nsp) (name %)))
     (merge {:db/id (tempid)})))
 
 ; for repl-testing purposes

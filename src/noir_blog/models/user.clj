@@ -11,7 +11,8 @@
   (db/find-all '[:find ?e :where [?e :user/username]]))
 
 (defn get-username [username]
-  (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username))
+  (if-let [user (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username)]
+    (db/map-keys user #(keyword (name %)))))
     
 (defn admin? []
   (session/get :admin))
@@ -71,5 +72,5 @@
 
 (defn init! []
   @(db/transact user-schema)
-  ; TODO - use add! when valid-* works
-  (store! (db/build-attr :user {:username "admin" :password "admin"})))
+  ; can't use add! b/c noir.validation/*errors* needs ring middleware to initialize it
+  (store! (db/build-attr :user (prepare {:username "admin" :password "admin"}))))
