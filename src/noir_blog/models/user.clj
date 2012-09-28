@@ -41,8 +41,12 @@
 
 ;; Operations
 
-(defn- store! [user]
-  @(db/transact [user]))
+(defn- create [user]
+  (db/transact! [(db/build-attr :user (prepare user))]))
+
+(defn update [attr]
+  (if-let [user (get-username (:username attr))]
+    (db/update (:id user) (db/namespace-keys attr :user))))
 
 (defn login! [{:keys [username password] :as user}]
   (let [{stored-pass :password} (get-username username)]
@@ -56,14 +60,15 @@
 (defn add! [{:keys [username password] :as user}]
   (when (valid-user? username)
     (when (valid-psw? password)
-      (store! (db/build-attr :user (prepare user))))))
+      (create user))))
 
+; TODO: updating username doesn't work
 (defn edit! [{:keys [username old-name password]}]
   (let [user {:username username :password password}]
     (if (= username old-name)
       (when (valid-psw? password)
-        (-> user (prepare) (store!)))
-      (add! user))))
+        (-> user (prepare) (update)))
+      (update user))))
 
 (defn remove! [username]
   (if-let [user (get-username username)]
@@ -73,5 +78,4 @@
 
 (defn init! []
   @(db/transact user-schema)
-  ; can't use add! b/c noir.validation/*errors* needs ring middleware to initialize it
-  (store! (db/build-attr :user (prepare {:username "admin" :password "admin"}))))
+  (create {:username "admin" :password "admin"}))

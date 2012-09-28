@@ -30,11 +30,17 @@
   (reset! connection (d/connect uri)))
 
 (defn transact [tx]
-  (prn "Transacting..." tx)
   (d/transact @connection tx))
 
+(defn transact! [tx]
+  (prn "Transacting..." tx)
+  @(transact tx))
+
 (defn delete [& ids]
-   @(transact (map #(vec [:db.fn/retractEntity %]) ids)))
+   (transact! (map #(vec [:db.fn/retractEntity %]) ids)))
+
+(defn update [id attr]
+  (transact! [(merge attr {:db/id id})]))
 
 (defn build-schema-attr [attr-name value-type & options]
   (let [cardinality (if (some #{:many} options)
@@ -65,8 +71,11 @@
 (defn localize-attr [attr]
   (map-keys attr #(keyword (name %))))
 
+(defn namespace-keys [attr nsp]
+  (map-keys attr #(keyword (name nsp) (name %))))
+
 (defn build-attr [nsp attr]
-  (->> (map-keys attr #(keyword (name nsp) (name %)))
+  (->> (namespace-keys attr nsp)
     (merge {:db/id (d/tempid :db.part/user)})))
 
 ; for repl-testing purposes
@@ -74,5 +83,5 @@
 (def user-data [{:username "Coolio" :password "Gang"}  {:username "Snoop" :password "Sucks"}])
 
 (defn user-init []
-  @(transact user-schema)
-  @(transact (map #(build-attr :user %) user-data)))
+  (transact! user-schema)
+  (transact! (map #(build-attr :user %) user-data)))
