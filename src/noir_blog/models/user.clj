@@ -1,6 +1,5 @@
 (ns noir-blog.models.user
   (:require [noir-blog.datomic :as db]
-            ;[simpledb.core :as db]
             [noir.util.crypt :as crypt]
             [noir.validation :as vali]
             [noir.session :as session]))
