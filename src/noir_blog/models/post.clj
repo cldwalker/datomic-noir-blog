@@ -91,10 +91,10 @@
 
 (defn add! [post]
   (when (valid? post)
-    (db/transact! [(db/build-attr model-namespace (prepare-new post))])))
+    (db/create model-namespace (prepare-new post))))
 
 (defn edit! [{:keys [id] :as post}]
-  (db/update id (db/namespace-keys (wrap-moniker (dissoc post :id)) model-namespace)))
+  (db/update model-namespace id (wrap-moniker (dissoc post :id))))
 
 (defn remove! [id]
   (db/delete id))

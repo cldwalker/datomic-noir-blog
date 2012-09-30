@@ -42,11 +42,11 @@
 ;; Operations
 
 (defn- create [user]
-  (db/transact! [(db/build-attr model-namespace (prepare user))]))
+  (db/create model-namespace (prepare user)))
 
 (defn update [attr]
   (if-let [user (get-username (:username attr))]
-    (db/update (:id user) (db/namespace-keys attr model-namespace))))
+    (db/update model-namespace (:id user) attr)))
 
 (defn login! [{:keys [username password] :as user}]
   (let [{stored-pass :password} (get-username username)]

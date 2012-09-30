@@ -46,7 +46,7 @@
 (defn delete [& ids]
    (transact! (map #(vec [:db.fn/retractEntity (num-id %)]) ids)))
 
-(defn update [id attr]
+(defn bare-update [id attr]
   (transact! [(merge attr {:db/id (num-id id)})]))
 
 (defn build-schema-attr [attr-name value-type & options]
@@ -84,9 +84,15 @@
 (defn local-find-id [id]
   (if-let [m (find-id id)] (localize-attr m)))
 
-(defn namespace-keys [attr nsp]
+(defn namespace-keys [nsp attr]
   (map-keys attr #(keyword (name nsp) (name %))))
 
 (defn build-attr [nsp attr]
-  (->> (namespace-keys attr nsp)
+  (->> (namespace-keys nsp attr)
     (merge {:db/id (d/tempid :db.part/user)})))
+
+(defn create [nsp attr]
+  (transact! [(build-attr nsp attr)]))
+
+(defn update [nsp id attr]
+  (bare-update id (namespace-keys nsp attr)))
