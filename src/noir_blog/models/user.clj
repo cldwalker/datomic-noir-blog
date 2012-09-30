@@ -5,6 +5,9 @@
             [noir.validation :as vali]
             [noir.session :as session]))
 
+(def model-namespace :user)
+(def schema (db/build-schema model-namespace [[:username :string] [:password :string]]))
+
 ;; Gets
 
 (defn all []
@@ -40,11 +43,11 @@
 ;; Operations
 
 (defn- create [user]
-  (db/transact! [(db/build-attr :user (prepare user))]))
+  (db/transact! [(db/build-attr model-namespace (prepare user))]))
 
 (defn update [attr]
   (if-let [user (get-username (:username attr))]
-    (db/update (:id user) (db/namespace-keys attr :user))))
+    (db/update (:id user) (db/namespace-keys attr model-namespace))))
 
 (defn login! [{:keys [username password] :as user}]
   (let [{stored-pass :password} (get-username username)]
@@ -71,8 +74,6 @@
 (defn remove! [username]
   (if-let [user (get-username username)]
     (db/delete (:id user))))
-
-(def schema (db/build-schema :user [[:username :string] [:password :string]]))
 
 (defn init! []
   (db/transact! schema)

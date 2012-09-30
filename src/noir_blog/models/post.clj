@@ -13,6 +13,11 @@
 (def date-format (tform/formatter "MM/dd/yy" (ctime/default-time-zone)))
 (def time-format (tform/formatter "h:mma" (ctime/default-time-zone)))
 (def mdp (MarkdownProcessor.))
+(def model-namespace :post)
+(def schema (db/build-schema model-namespace
+                             [[:title :string] [:body :string] [:moniker :string]
+                             [:username :string] [:date :string] [:tme :string]]))
+
 
 ;; Gets
 
@@ -86,16 +91,13 @@
 
 (defn add! [post]
   (when (valid? post)
-    (db/transact! [(db/build-attr :post (prepare-new post))])))
+    (db/transact! [(db/build-attr model-namespace (prepare-new post))])))
 
 (defn edit! [{:keys [id] :as post}]
-  (db/update id (db/namespace-keys (wrap-moniker (dissoc post :id)) :post)))
+  (db/update id (db/namespace-keys (wrap-moniker (dissoc post :id)) model-namespace)))
 
 (defn remove! [id]
   (db/delete id))
-
-(def schema (db/build-schema :post [[:title :string] [:body :string] [:moniker :string]
-                                   [:username :string] [:date :string] [:tme :string]]))
 
 (defn init! []
   (db/transact! schema))
