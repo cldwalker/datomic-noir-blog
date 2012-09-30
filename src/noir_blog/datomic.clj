@@ -90,11 +90,3 @@
 (defn build-attr [nsp attr]
   (->> (namespace-keys attr nsp)
     (merge {:db/id (d/tempid :db.part/user)})))
-
-; for repl-testing purposes
-(def user-schema (build-schema :user [[:username :string]  [:password :string]]))
-(def user-data [{:username "Coolio" :password "Gang"}  {:username "Snoop" :password "Sucks"}])
-
-(defn user-init []
-  (transact! user-schema)
-  (transact! (map #(build-attr :user %) user-data)))

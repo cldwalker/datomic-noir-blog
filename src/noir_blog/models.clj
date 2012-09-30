@@ -5,11 +5,6 @@
             [noir-blog.models.post :as posts]))
 
 (defn initialize []
-  ;(db/init)
   (datomic/init)
   (users/init!)
   (posts/init!))
-  ;(when-not (db/get :users)
-  ;  ;;db values need to be initialized.. this should only happen once.
-  ;  ;(users/init!)
-  ;  (posts/init!)))
