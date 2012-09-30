@@ -8,9 +8,7 @@
 ;; Gets
 
 (defn all []
-  (->>
-    (db/find-all '[:find ?e :where [?e :user/username]])
-    (map db/localize-attr)))
+  (db/all '[:find ?e :where [?e :user/username]]))
 
 (defn get-username [username]
   (if-let [user (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username)]
@@ -74,8 +72,8 @@
   (if-let [user (get-username username)]
     (db/delete (:id user))))
 
-(def user-schema (db/build-schema :user [[:username :string] [:password :string]]))
+(def schema (db/build-schema :user [[:username :string] [:password :string]]))
 
 (defn init! []
-  @(db/transact user-schema)
+  (db/transact! schema)
   (create {:username "admin" :password "admin"}))

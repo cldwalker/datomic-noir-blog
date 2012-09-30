@@ -36,11 +36,18 @@
   (prn "Transacting..." tx)
   @(transact tx))
 
+(defn num-id [id]
+  (Long. id))
+
+(defn find-id [id]
+  (let [entity (d/entity (db) (num-id id))]
+    (if-not (empty? entity) (entity->map entity))))
+
 (defn delete [& ids]
-   (transact! (map #(vec [:db.fn/retractEntity %]) ids)))
+   (transact! (map #(vec [:db.fn/retractEntity (num-id %)]) ids)))
 
 (defn update [id attr]
-  (transact! [(merge attr {:db/id id})]))
+  (transact! [(merge attr {:db/id (num-id id)})]))
 
 (defn build-schema-attr [attr-name value-type & options]
   (let [cardinality (if (some #{:many} options)
@@ -70,6 +77,12 @@
 
 (defn localize-attr [attr]
   (map-keys attr #(keyword (name %))))
+
+(defn all [query]
+  (map localize-attr (find-all query)))
+
+(defn local-find-id [id]
+  (if-let [m (find-id id)] (localize-attr m)))
 
 (defn namespace-keys [attr nsp]
   (map-keys attr #(keyword (name nsp) (name %))))

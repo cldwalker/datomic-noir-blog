@@ -10,16 +10,16 @@
 
 ;; Page structure
 
-(defpartial post-item [{:keys [perma-link title md-body date tme] :as post}]
+(defpartial post-item [{:keys [moniker title body date tme] :as post}]
             (when post
               [:li.post
-               [:h2 (link-to perma-link title)]
+               [:h2 (link-to (posts/perma-link moniker) title)]
                [:ul.datetime
                 [:li date]
                 [:li tme]
                 (when (user/admin?)
                   [:li (link-to (posts/edit-url post) "edit")])]
-               [:div.content md-body]]))
+               [:div.content (posts/md->html body)]]))
 
 (defpartial blog-page [items]
             (common/main-layout

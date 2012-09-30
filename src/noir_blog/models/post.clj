@@ -1,5 +1,5 @@
 (ns noir-blog.models.post
-  (:require [simpledb.core :as db]
+  (:require [noir-blog.datomic :as db]
             [clj-time.core :as ctime]
             [clj-time.format :as tform]
             [clj-time.coerce :as coerce]
@@ -16,30 +16,25 @@
 
 ;; Gets
 
+(defn all []
+  (db/all '[:find ?e :where [?e :post/title]]))
+
 (defn total []
-  (count (db/get :post-ids)))
-
-(defn id->post [id]
-  (db/get-in :posts [id]))
-
-(defn ids->posts [ids]
-  (map id->post ids))
+  (count (all)))
 
 (defn moniker->post [moniker]
-  (id->post (db/get-in :post-monikers [moniker])))
+  (if-let [post (db/find-first '[:find ?e :in $ ?moniker :where [?e :post/moniker ?moniker]] moniker)]
+    (db/localize-attr post)))
 
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing
         prev (* page-num posts-per-page)]
-    (ids->posts (take posts-per-page (drop prev (db/get :post-ids))))))
+    (take posts-per-page (drop prev (all)))))
 
 (defn get-latest []
   (get-page 1))
 
 ;; Mutations and checks
-
-(defn next-id []
-  (str (db/update! :next-post-id inc)))
 
 (defn gen-moniker [title]
   (-> title
@@ -48,7 +43,9 @@
     (string/replace #" " "-")))
 
 (defn new-moniker? [moniker]
-  (not (contains? (db/get :post-monikers) moniker)))
+  (->> (map :moniker (all))
+    (some #{moniker})
+    not))
 
 (defn perma-link [moniker]
   (str "/blog/view/" moniker))
@@ -62,28 +59,19 @@
 (defn wrap-moniker [{:keys [title] :as post}]
   (let [moniker (gen-moniker title)]
     (-> post
-      (assoc :moniker moniker)
-      (assoc :perma-link (perma-link moniker)))))
+      (assoc :moniker moniker))))
     
-(defn wrap-markdown [{:keys [body] :as post}]
-  (assoc post :md-body (md->html body)))
-
 (defn wrap-time [post]
   (let [ts (ctime/now)]
     (-> post
-      (assoc :ts (coerce/to-long ts))
       (assoc :date (tform/unparse date-format ts))
       (assoc :tme (tform/unparse time-format ts)))))
 
-(defn prepare-new [{:keys [title body] :as post}]
-  (let [id (next-id)
-        ts (ctime/now)]
-    (-> post
-      (assoc :id id)
-      (assoc :username (users/me))
-      (wrap-time)
-      (wrap-moniker)
-      (wrap-markdown))))
+(defn prepare-new [post]
+  (-> post
+    (assoc :username (users/me))
+    (wrap-time)
+    (wrap-moniker)))
 
 (defn valid? [{:keys [title body]}]
   (vali/rule (vali/has-value? title)
@@ -98,29 +86,16 @@
 
 (defn add! [post]
   (when (valid? post)
-    (let [{:keys [id moniker] :as final} (prepare-new post)]
-      (db/update! :posts assoc id final)
-      (db/update! :post-ids conj id)
-      (db/update! :post-monikers assoc moniker id))))
+    (db/transact! [(db/build-attr :post (prepare-new post))])))
 
-(defn edit! [{:keys [id title] :as post}]
-  (let [{orig-moniker :moniker :as original} (id->post id)
-        {:keys [moniker] :as final} (-> post
-                                      (wrap-moniker)
-                                      (wrap-markdown))]
-    (db/update! :posts assoc id (merge original final))
-    (db/update! :post-monikers dissoc orig-moniker) ;; remove the old moniker entry in case it changed
-    (db/update! :post-monikers assoc moniker id)))
+(defn edit! [{:keys [id] :as post}]
+  (db/update id (db/namespace-keys (wrap-moniker (dissoc post :id)) :post)))
 
 (defn remove! [id]
-  (let [{:keys [moniker]} (id->post id)
-        neue-ids (remove #{id} (db/get :post-ids))]
-    (db/put! :post-ids neue-ids) 
-    (db/update! :posts dissoc id)
-    (db/update! :post-monikers dissoc moniker)))
+  (db/delete id))
+
+(def schema (db/build-schema :post [[:title :string] [:body :string] [:moniker :string]
+                                   [:username :string] [:date :string] [:tme :string]]))
 
 (defn init! []
-    (db/put! :next-post-id -1)
-    (db/put! :posts {})
-    (db/put! :post-ids (list))
-    (db/put! :post-monikers {}))
+  (db/transact! schema))

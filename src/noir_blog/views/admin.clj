@@ -6,6 +6,7 @@
         hiccup.form)
   (:require [noir.session :as session]
             [noir.validation :as vali]
+            [noir-blog.datomic :as db]
             [noir.response :as resp]
             [clojure.string :as string]
             [noir-blog.models.post :as posts]
@@ -95,7 +96,7 @@
              (render "/blog/admin/post/add" post)))
 
 (defpage "/blog/admin/post/edit/:id" {:keys [id]}
-         (if-let [post (posts/id->post id)]
+         (if-let [post (db/local-find-id id)]
            (common/admin-layout
              (form-to [:post (str "/blog/admin/post/edit/" id)]
                       [:ul.actions
