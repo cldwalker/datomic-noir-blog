@@ -84,6 +84,10 @@
 (defn local-find-id [id]
   (if-let [m (find-id id)] (localize-attr m)))
 
+(defn local-find-first [& args]
+  (if-let [obj (apply find-first args)]
+    (localize-attr obj)))
+
 (defn namespace-keys [nsp attr]
   (map-keys attr #(keyword (name nsp) (name %))))
 

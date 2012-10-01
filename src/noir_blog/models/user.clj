@@ -13,8 +13,7 @@
   (db/all '[:find ?e :where [?e :user/username]]))
 
 (defn get-username [username]
-  (if-let [user (db/find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username)]
-    (db/localize-attr user)))
+  (db/local-find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username))
     
 (defn admin? []
   (session/get :admin))

@@ -28,8 +28,7 @@
   (count (all)))
 
 (defn moniker->post [moniker]
-  (if-let [post (db/find-first '[:find ?e :in $ ?moniker :where [?e :post/moniker ?moniker]] moniker)]
-    (db/localize-attr post)))
+   (db/local-find-first '[:find ?e :in $ ?moniker :where [?e :post/moniker ?moniker]] moniker))
 
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing
