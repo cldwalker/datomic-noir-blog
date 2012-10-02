@@ -28,7 +28,7 @@
   (count (all)))
 
 (defn moniker->post [moniker]
-   (db/local-find-first '[:find ?e :in $ ?moniker :where [?e :post/moniker ?moniker]] moniker))
+  (db/local-find-first-by model-namespace {:moniker moniker}))
 
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing

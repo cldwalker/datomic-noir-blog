@@ -1,5 +1,6 @@
 (ns noir-blog.datomic
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            clojure.string))
 
 (def uri "datomic:mem://noir-blog")
 (def connection (atom nil))
@@ -23,6 +24,16 @@
 
 (defn find-first [query & args]
   (first (apply find-all query args)))
+
+(defn find-by [query-map]
+  (let [query-string (clojure.string/join " "
+                      (concat
+                        ["[:find ?e :in $"]
+                        (map #(str "?field" % " ?val" %) (range (count query-map)))
+                        [":where"]
+                        (map #(str "[?e ?field" % " ?val" % "]") (range (count query-map)))
+                        ["]"]))]
+    (apply find-all query-string (flatten (vec query-map)))))
 
 (defn init []
   (d/delete-database uri)
@@ -84,12 +95,14 @@
 (defn local-find-id [id]
   (if-let [m (find-id id)] (localize-attr m)))
 
-(defn local-find-first [& args]
-  (if-let [obj (apply find-first args)]
-    (localize-attr obj)))
-
 (defn namespace-keys [nsp attr]
   (map-keys attr #(keyword (name nsp) (name %))))
+
+(defn local-find-by [nsp query-map]
+  (map localize-attr (find-by (namespace-keys nsp query-map))))
+
+(defn local-find-first-by [nsp query-map]
+  (first (local-find-by nsp query-map)))
 
 (defn build-attr [nsp attr]
   (->> (namespace-keys nsp attr)

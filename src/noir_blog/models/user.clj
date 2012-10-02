@@ -13,7 +13,7 @@
   (db/all '[:find ?e :where [?e :user/username]]))
 
 (defn get-username [username]
-  (db/local-find-first '[:find ?e :in $ ?name :where [?e :user/username ?name]] username))
+  (db/local-find-first-by model-namespace {:username username}))
     
 (defn admin? []
   (session/get :admin))
