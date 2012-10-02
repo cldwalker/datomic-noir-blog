@@ -43,8 +43,8 @@
 (defn- create [user]
   (db/create model-namespace (prepare user)))
 
-(defn update [attr]
-  (if-let [user (get-username (:username attr))]
+(defn update [attr username]
+  (if-let [user (get-username username)]
     (db/update model-namespace (:id user) attr)))
 
 (defn login! [{:keys [username password] :as user}]
@@ -61,13 +61,12 @@
     (when (valid-psw? password)
       (create user))))
 
-; TODO: updating username doesn't work
 (defn edit! [{:keys [username old-name password]}]
   (let [user {:username username :password password}]
     (if (= username old-name)
       (when (valid-psw? password)
-        (-> user (prepare) (update)))
-      (update user))))
+        (-> user (prepare) (update username)))
+      (update user old-name))))
 
 (defn remove! [username]
   (if-let [user (get-username username)]
