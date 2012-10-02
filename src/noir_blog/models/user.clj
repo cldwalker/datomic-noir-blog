@@ -10,7 +10,7 @@
 ;; Gets
 
 (defn all []
-  (db/all '[:find ?e :where [?e :user/username]]))
+  (db/local-all-by model-namespace :username))
 
 (defn get-username [username]
   (db/local-find-first-by model-namespace {:username username}))

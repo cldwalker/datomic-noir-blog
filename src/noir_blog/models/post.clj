@@ -22,7 +22,7 @@
 ;; Gets
 
 (defn all []
-  (db/all '[:find ?e :where [?e :post/title]]))
+  (db/local-all-by model-namespace :title))
 
 (defn total []
   (count (all)))

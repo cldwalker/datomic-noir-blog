@@ -101,6 +101,9 @@
 (defn local-find-by [nsp query-map]
   (map localize-attr (find-by (namespace-keys nsp query-map))))
 
+(defn local-all-by [nsp field]
+  (all (format "[:find ?e :where [?e %s/%s]]" nsp (name field))))
+
 (defn local-find-first-by [nsp query-map]
   (first (local-find-by nsp query-map)))
 
