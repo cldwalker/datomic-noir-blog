@@ -1,11 +1,14 @@
 ## Description
 
-This is a fully functioning blog that serves as an example web app using datomic and noir.
-While the models and queries are simple, the goal is to show how easy interacting with datomic can
-be given [the right helpers](#TODO). For a before/after comparison of what changed, [view the
-diff](#TODO). One difference you'll notice in datomic helpers here is that database creating
-and querying are namespace independent. This means that instead of model code with
-:user/username and :post/title you can use :username and :title.
+This is a fully functioning blog that serves as an example web app using datomic and noir.  While
+the models and queries are simple, the goal is to show how easy interacting with datomic can be
+given [the right
+helpers](https://github.com/cldwalker/datomic-noir-blog/blob/master/src/noir_blog/datomic.clj).  For
+a before/after comparison of what changed, [view the
+diff](https://github.com/cldwalker/datomic-noir-blog/compare/upgrades...master). One difference
+you'll notice in datomic helpers here is that database creating and querying are namespace
+independent. This means that instead of model code with :user/username and :post/title you can use
+:username and :title.
 
 ## Usage
 
