@@ -3,17 +3,27 @@
             clojure.string))
 
 (def uri "datomic:mem://noir-blog")
-(def connection (atom nil))
+(def ^:dynamic *connection*)
+(def ^:dynamic *db*)
 
-(defn db [] (d/db @connection))
+; from https://gist.github.com/3150938
+(defn wrap-datomic
+  "A Ring middleware that provides a request-consistent database connection and
+  value for the life of a request."
+  [handler uri]
+  (fn [request]
+    (let [conn (d/connect uri)]
+      (binding [*connection* conn
+                *db*         (d/db conn)]
+        (handler request)))))
 
 (defn q [query & args]
-  (apply d/q query (db) args))
+  (apply d/q query *db* args))
 
 (defn where [query & args]
   (->> (apply q query args)
     (mapv (fn [items]
-      (mapv #(d/entity (db) %) items)))))
+      (mapv #(d/entity *db* %) items)))))
 
 (defn entity->map [e]
   (merge (select-keys e (keys e))
@@ -37,11 +47,14 @@
 
 (defn init []
   (d/delete-database uri)
-  (d/create-database uri)
-  (reset! connection (d/connect uri)))
+  (d/create-database uri))
+
+(defn repl-init []
+  (def ^:dynamic *connection* (d/connect uri))
+  (def ^:dynamic *db* (d/db *connection*)))
 
 (defn transact [tx]
-  (d/transact @connection tx))
+  (d/transact *connection* tx))
 
 (defn transact! [tx]
   (prn "Transacting..." tx)
@@ -51,7 +64,7 @@
   (Long. id))
 
 (defn find-id [id]
-  (let [entity (d/entity (db) (num-id id))]
+  (let [entity (d/entity *db* (num-id id))]
     (if-not (empty? entity) (entity->map entity))))
 
 (defn delete [& ids]

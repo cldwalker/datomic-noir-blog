@@ -1,8 +1,11 @@
 (ns noir-blog.server
   (:require [noir.server :as server]
+            [noir-blog.datomic :as db]
             [noir-blog.models :as models]))
 
 (server/load-views "src/noir_blog/views/")
+
+(server/add-middleware db/wrap-datomic db/uri)
 
 (defn -main [& m]
   (let [mode (or (first m) :dev)
