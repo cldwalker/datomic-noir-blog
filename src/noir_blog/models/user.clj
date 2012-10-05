@@ -72,6 +72,4 @@
   (if-let [user (get-username username)]
     (db/delete (:id user))))
 
-(defn init! []
-  (db/transact! schema)
-  (create {:username "admin" :password "admin"}))
+(def seed-data (db/build-seed-data model-namespace [(prepare {:username "admin" :password "admin"})]))

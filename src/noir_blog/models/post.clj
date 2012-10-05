@@ -97,6 +97,3 @@
 
 (defn remove! [id]
   (db/delete id))
-
-(defn init! []
-  (db/transact! schema))
