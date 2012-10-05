@@ -1,20 +1,18 @@
 ## Description
 
 This is a fully functioning blog that serves as an example web app using datomic and noir.  While
-the models and queries are simple, the goal is to show how easy interacting with datomic can be
-given [the right
-helpers](https://github.com/cldwalker/datomic-noir-blog/blob/master/src/noir_blog/datomic.clj).  For
-a before/after comparison of what changed, [view the
-diff](https://github.com/cldwalker/datomic-noir-blog/compare/upgrades...master). One difference
-you'll notice in datomic helpers here is that database creating and querying are namespace
-independent. This means that instead of model code with :user/username and :post/title you can use
-:username and :title.
+the models and queries are simple, the goal is to show how easy interacting with datomic can be with
+[datomic-simple](http://github.com/cldwalker/datomic-simple). For a before/after comparison of what
+changed, [view the diff](https://github.com/cldwalker/datomic-noir-blog/compare/upgrades...master).
 
 ## Usage
 
 ```bash
-lein deps
-lein run
+# Until datomic-simple is a clojar or lein-git-deps works with this app
+$ git clone git://github.com/cldwalker/datomic-simple.git; cd datomic-simple; lein install; cd -
+
+$ lein deps
+$ lein run
 ```
 
 To login, an initial user is created:
