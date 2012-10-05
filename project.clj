@@ -4,6 +4,7 @@
                            [clj-time "0.3.7"]
                            [noir "1.3.0-beta10"]
                            [org.markdownj/markdownj "0.3.0-1.0.2b4"]
-                           [com.datomic/datomic-free "0.8.3524"]]
+                           [com.datomic/datomic-free "0.8.3524"]
+                           [datomic-simple "0.1.0"]]
             :main noir-blog.server)
 

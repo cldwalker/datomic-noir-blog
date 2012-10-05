@@ -6,7 +6,7 @@
         hiccup.form)
   (:require [noir.session :as session]
             [noir.validation :as vali]
-            [noir-blog.datomic :as db]
+            [datomic-simple.core :as db]
             [noir.response :as resp]
             [clojure.string :as string]
             [noir-blog.models.post :as posts]

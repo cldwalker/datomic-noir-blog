@@ -1,5 +1,5 @@
 (ns noir-blog.models.post
-  (:require [noir-blog.datomic :as db]
+  (:require [datomic-simple.core :as db]
             [clj-time.core :as ctime]
             [clj-time.format :as tform]
             [clj-time.coerce :as coerce]
