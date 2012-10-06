@@ -5,7 +5,7 @@
 
 (def uri "datomic:mem://noir-blog")
 
-(defn initialize []
-  (db/start {:uri uri
+(defn initialize [opts]
+  (db/start (merge opts {
              :schemas [user/schema post/schema]
-             :seed-data [user/seed-data]}))
+             :seed-data [user/seed-data]})))
