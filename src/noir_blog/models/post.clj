@@ -1,5 +1,5 @@
 (ns noir-blog.models.post
-  (:require [datomic-simple.core :as db]
+  (:require [datomic-simple.core :as ds]
             [clj-time.core :as ctime]
             [clj-time.format :as tform]
             [clj-time.coerce :as coerce]
@@ -14,14 +14,16 @@
 (def time-format (tform/formatter "h:mma" (ctime/default-time-zone)))
 (def mdp (MarkdownProcessor.))
 (def model-namespace :post)
-(def schema (db/build-schema model-namespace
-                             [[:title :string] [:body :string] [:moniker :string]
-                             [:username :string] [:date :string] [:tme :string]]))
-(db/create-model-fns model-namespace)
-
+(def schema (ds/build-schema model-namespace
+      [[:title :string]
+       [:body :string]
+       [:moniker :string]
+       [:username :string]
+       [:date :string]
+       [:tme :string]]))
+(ds/create-model-fns model-namespace)
 
 ;; Gets
-
 (defn all []
   (find-all-by :title))
 
@@ -97,4 +99,4 @@
   (update id (wrap-moniker (dissoc post :id))))
 
 (defn remove! [id]
-  (db/delete id))
+  (ds/delete id))

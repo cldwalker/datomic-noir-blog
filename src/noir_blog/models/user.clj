@@ -1,12 +1,14 @@
 (ns noir-blog.models.user
-  (:require [datomic-simple.core :as db]
+  (:require [datomic-simple.core :as ds]
             [noir.util.crypt :as crypt]
             [noir.validation :as vali]
             [noir.session :as session]))
 
 (def model-namespace :user)
-(def schema (db/build-schema model-namespace [[:username :string] [:password :string]]))
-(db/create-model-fns model-namespace)
+(def schema (ds/build-schema model-namespace
+     [[:username :string]
+      [:password :string]]))
+(ds/create-model-fns model-namespace)
 
 ;; Gets
 
@@ -71,6 +73,6 @@
 
 (defn remove! [username]
   (if-let [user (get-username username)]
-    (db/delete (:id user))))
+    (ds/delete (:id user))))
 
-(def seed-data (db/build-seed-data model-namespace [(prepare {:username "admin" :password "admin"})]))
+(def seed-data (ds/build-seed-data model-namespace [(prepare {:username "admin" :password "admin"})]))
