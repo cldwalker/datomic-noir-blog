@@ -6,14 +6,15 @@
 
 (def model-namespace :user)
 (def schema (db/build-schema model-namespace [[:username :string] [:password :string]]))
+(db/create-model-fns model-namespace)
 
 ;; Gets
 
 (defn all []
-  (db/find-all-by model-namespace :username))
+  (find-all-by :username))
 
 (defn get-username [username]
-  (db/find-first model-namespace {:username username}))
+  (find-first {:username username}))
     
 (defn admin? []
   (session/get :admin))
@@ -40,12 +41,12 @@
 
 ;; Operations
 
-(defn- create [user]
-  (db/create model-namespace (prepare user)))
+(defn- prepared-create [user]
+  (create (prepare user)))
 
 (defn update [attr username]
   (if-let [user (get-username username)]
-    (db/update model-namespace (:id user) attr)))
+    (update (:id user) attr)))
 
 (defn login! [{:keys [username password] :as user}]
   (let [{stored-pass :password} (get-username username)]
@@ -59,7 +60,7 @@
 (defn add! [{:keys [username password] :as user}]
   (when (valid-user? username)
     (when (valid-psw? password)
-      (create user))))
+      (prepared-create user))))
 
 (defn edit! [{:keys [username old-name password]}]
   (let [user {:username username :password password}]

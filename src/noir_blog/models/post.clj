@@ -17,18 +17,19 @@
 (def schema (db/build-schema model-namespace
                              [[:title :string] [:body :string] [:moniker :string]
                              [:username :string] [:date :string] [:tme :string]]))
+(db/create-model-fns model-namespace)
 
 
 ;; Gets
 
 (defn all []
-  (db/find-all-by model-namespace :title))
+  (find-all-by :title))
 
 (defn total []
   (count (all)))
 
 (defn moniker->post [moniker]
-  (db/find-first model-namespace {:moniker moniker}))
+  (find-first {:moniker moniker}))
 
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing
@@ -90,10 +91,10 @@
 
 (defn add! [post]
   (when (valid? post)
-    (db/create model-namespace (prepare-new post))))
+    (create (prepare-new post))))
 
 (defn edit! [{:keys [id] :as post}]
-  (db/update model-namespace id (wrap-moniker (dissoc post :id))))
+  (update id (wrap-moniker (dissoc post :id))))
 
 (defn remove! [id]
   (db/delete id))
