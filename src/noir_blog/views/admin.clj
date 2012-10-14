@@ -96,7 +96,7 @@
              (render "/blog/admin/post/add" post)))
 
 (defpage "/blog/admin/post/edit/:id" {:keys [id]}
-         (if-let [post (db/local-find-id id)]
+         (if-let [post (db/find-id id)]
            (common/admin-layout
              (form-to [:post (str "/blog/admin/post/edit/" id)]
                       [:ul.actions

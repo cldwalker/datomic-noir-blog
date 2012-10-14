@@ -10,10 +10,10 @@
 ;; Gets
 
 (defn all []
-  (db/local-all-by model-namespace :username))
+  (db/all-by model-namespace :username))
 
 (defn get-username [username]
-  (db/local-find-first-by model-namespace {:username username}))
+  (db/find-first-by model-namespace {:username username}))
     
 (defn admin? []
   (session/get :admin))

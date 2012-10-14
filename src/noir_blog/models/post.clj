@@ -22,13 +22,13 @@
 ;; Gets
 
 (defn all []
-  (db/local-all-by model-namespace :title))
+  (db/all-by model-namespace :title))
 
 (defn total []
   (count (all)))
 
 (defn moniker->post [moniker]
-  (db/local-find-first-by model-namespace {:moniker moniker}))
+  (db/find-first-by model-namespace {:moniker moniker}))
 
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing
