@@ -7,5 +7,6 @@
 
 (defn initialize [opts]
   (ds/start (merge opts {
+             :uri uri
              :schemas [user/schema post/schema]
              :seed-data [user/seed-data]})))
