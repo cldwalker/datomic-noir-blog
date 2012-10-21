@@ -121,7 +121,7 @@
            [:ul.actions
             (map action-item user-actions)]
            [:ul.items
-            (map user-item (users/all))]))
+            (map user-item (users/find-all))]))
 
 (defpage "/blog/admin/user/add" {:as user}
          (common/admin-layout

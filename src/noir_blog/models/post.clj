@@ -24,11 +24,8 @@
 (ds/create-model-fns model-namespace)
 
 ;; Gets
-(defn all []
-  (find-all-by :title))
-
 (defn total []
-  (count (all)))
+  (count (find-all)))
 
 (defn moniker->post [moniker]
   (find-first {:moniker moniker}))
@@ -36,7 +33,7 @@
 (defn get-page [page]
   (let [page-num (dec (Integer. page)) ;; make it 1-based indexing
         prev (* page-num posts-per-page)]
-    (take posts-per-page (drop prev (all)))))
+    (take posts-per-page (drop prev (find-all)))))
 
 (defn get-latest []
   (get-page 1))
@@ -50,7 +47,7 @@
     (string/replace #" " "-")))
 
 (defn new-moniker? [moniker]
-  (->> (map :moniker (all))
+  (->> (map :moniker (find-all))
     (some #{moniker})
     not))
 

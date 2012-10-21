@@ -12,9 +12,6 @@
 
 ;; Gets
 
-(defn all []
-  (find-all-by :username))
-
 (defn get-username [username]
   (find-first {:username username}))
     
