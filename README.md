@@ -9,7 +9,7 @@ changed, [view the diff](https://github.com/cldwalker/datomic-noir-blog/compare/
 
 ```bash
 # Until datomic-simple is a clojar or lein-git-deps works with this app
-$ git clone git://github.com/cldwalker/datomic-simple.git; cd datomic-simple; lein install; cd -
+$ git clone https://github.com/cldwalker/datomic-noir-blog.git; cd datomic-noir-blog; lein install;
 
 $ lein deps
 $ lein run
